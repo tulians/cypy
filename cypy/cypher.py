@@ -5,7 +5,6 @@ import time
 import string
 import base64
 import random
-import inspect
 
 
 def encode(keyword, string, iterations=1):
@@ -57,15 +56,15 @@ def repeat_task_periodically(period, task, *arguments):
                 yield max(time_base + offset * period - time.time(), 0)
         iterator = _tick()
         while True:
-            # Python 3 compatibility.
+            time.sleep(next(iterator))
             try:
-                time.sleep(iterator.next())
-                if len(arguments) >= len(inspect.getargspec(task).args):
-                    task(*arguments)
-            except AttributeError:
-                time.sleep(next(iterator))
-                if len(arguments) >= len(inspect.getfullargspec(task).args):
-                    task(*arguments)
+                task(*arguments)
+            except TypeError as exception_detail:
+                print("ERROR: There is a mismatch between the number"
+                      " of  arguments provided in `arguments` and the ones"
+                      " needed by the task function. Detail: " +
+                      str(exception_detail))
+                break
     else:
         print("ERROR: Make sure to provide a callable task to perform. Param"
               " `task` is not a callable method/function.")
