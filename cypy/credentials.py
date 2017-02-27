@@ -1,11 +1,11 @@
 # cypy - Creadentials definition.
 # ===================================
-import cypher as cy
+from cypher import encode, generate_random_phrase
 
 
 class Credentials(object):
     """User information of assumed competence."""
     def __init__(self, username, password, keyword_length=10):
-        self.keyword = cy.generate_random_string(keyword_length)
-        self.username = cy.encode(self.keyword, username)
-        self.password = cy.encode(self.keyword, password)
+        self.keyword = generate_random_phrase(keyword_length)
+        self.username = encode(self.keyword, username)
+        self.password = encode(self.keyword, password)

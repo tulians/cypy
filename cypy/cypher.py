@@ -1,45 +1,29 @@
 # cypy - Vigenere cypher scheme.
 # ===================================
-import sys
 import time
 import string
-import base64
 import random
+from itertools import count, cycle
+
+char_to_int = string.printable[:95]
+int_to_char = dict(zip(char_to_int, count()))
 
 
-def encode(keyword, string, iterations=1):
-    encoded_string = _encode(keyword, string)
-    for _ in range(iterations - 1):
-        encoded_string = _encode(keyword, encoded_string)
-    return encoded_string
+def vigenere(key, text, decrypt=False):
+    sign = -1 if decrypt else 1
+    num_key = [int_to_char[char] for char in key]
+    out = (char_to_int[(int_to_char[char] + sign * key_index) %
+                       len(char_to_int)]
+           for key_index, char in zip(cycle(num_key), text))
+    return ''.join(out)
 
 
-def decode(keyword, string, iterations=1):
-    decoded_string = _decode(keyword, string)
-    for _ in range(iterations - 1):
-        decoded_string = _decode(keyword, decoded_string)
-    return decoded_string
+def encode(key, text):
+    return vigenere(key, text)
 
 
-def _encode(keyword, string):
-    encoded_characters = []
-    for i in range(len(string)):
-        key_character = keyword[i % len(keyword)]
-        encoded_character = chr(ord(string[i]) + ord(key_character) % 256)
-        encoded_characters.append(encoded_character)
-    encoded_string = "".join(encoded_characters)
-    return base64.urlsafe_b64encode(encoded_string)
-
-
-def _decode(keyword, string):
-    decoded_characters = []
-    string = base64.urlsafe_b64decode(string)
-    for i in range(len(string)):
-        key_character = keyword[i % len(keyword)]
-        decoded_character = chr(abs(ord(string[i]) - ord(key_character) % 256))
-        decoded_characters.append(decoded_character)
-    decoded_string = "".join(decoded_characters)
-    return decoded_string
+def decode(key, text):
+    return vigenere(key, text, True)
 
 
 def repeat_task_periodically(period, task, *arguments):
@@ -70,7 +54,7 @@ def repeat_task_periodically(period, task, *arguments):
               " `task` is not a callable method/function.")
 
 
-def generate_random_string(length, char_set=(string.ascii_letters +
+def generate_random_phrase(length, char_set=(string.ascii_letters +
                                              string.digits +
                                              string.punctuation)):
     if type(char_set) is str:
