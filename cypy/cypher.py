@@ -50,6 +50,7 @@ class TaskThread(Thread):
             Thread.join(self)
         return self.username, self.password
 
+
 class IntervalThread(TaskThread):
     def __init__(self, period, task, key, username, password):
         super().__init__(task, key, username, password)
@@ -60,34 +61,6 @@ class IntervalThread(TaskThread):
         while not self.stopped.is_set():
             time.sleep(self.period)
             self.username, self.password = super().run()
-
-
-def repeat_task_periodically(period, task, *arguments):
-    if callable(task):
-        def _tick():
-            time_base = time.time()
-            # As the time_base variable will hold still a moment in time,
-            # the offset will be used to generate multiples of the period,
-            # which can then be compared with the current time in the yield
-            # statement.
-            offset = 0
-            while True:
-                offset += 1
-                yield max(time_base + offset * period - time.time(), 0)
-        iterator = _tick()
-        while True:
-            time.sleep(next(iterator))
-            try:
-                task(*arguments)
-            except TypeError as exception_detail:
-                print("ERROR: There is a mismatch between the number"
-                      " of  arguments provided in `arguments` and the ones"
-                      " needed by the task function. Detail: " +
-                      str(exception_detail))
-                break
-    else:
-        print("ERROR: Make sure to provide a callable task to perform. Param"
-              " `task` is not a callable method/function.")
 
 
 def generate_random_phrase(length, char_set=(string.ascii_letters +
