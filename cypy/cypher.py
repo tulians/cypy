@@ -67,11 +67,10 @@ def generate_random_phrase(length, char_set=(string.ascii_letters +
                                              string.digits +
                                              string.punctuation)):
     if type(char_set) is str:
-        # Python 3 compatibility.
         try:
             return "".join(random.choice(char_set) for _ in xrange(length))
         except NameError:
             return "".join(random.choice(char_set) for _ in range(length))
     else:
-        print("ERROR: Make sure to provide a character set consisting on a"
-              " string of chars. Param `char_set` is not of type str.")
+        raise NameError("Make sure to provide a character set consisting of"
+                        " a string of chars. type(char_set) != str.")

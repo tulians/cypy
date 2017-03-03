@@ -26,6 +26,6 @@ class Credentials(object):
         password = self.th.password
         return username, password
 
-    def stop(self):
+    def _stop(self):
         """Stop credentials encryption."""
         return self.th.join()
