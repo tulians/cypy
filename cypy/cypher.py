@@ -28,6 +28,7 @@ def encode(key, text):
 def decode(key, text):
     return vigenere(key, text, True)
 
+
 class TaskThread(Thread):
     def __init__(self, task, key, username, password):
         Thread.__init__(self)
@@ -47,6 +48,7 @@ class TaskThread(Thread):
         if self.is_alive():
             self.stopped.set()
             Thread.join(self)
+        return self.username, self.password
 
 class IntervalThread(TaskThread):
     def __init__(self, period, task, key, username, password):
@@ -56,7 +58,6 @@ class IntervalThread(TaskThread):
     def run(self):
         self.username, self.password = super().run()
         while not self.stopped.is_set():
-            print(self.username, self.password)
             time.sleep(self.period)
             self.username, self.password = super().run()
 
