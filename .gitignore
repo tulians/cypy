@@ -9,6 +9,8 @@ __pycache__/
 *.swp
 *.db
 *.sql
+.tm_track
+.logs
 
 # C extensions
 *.so
