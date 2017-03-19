@@ -4,6 +4,8 @@
 
 # Built-in modules
 import time
+import fcntl
+import struct
 import socket
 from urllib.parse import urlparse, parse_qsl
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -12,7 +14,16 @@ from data import Data
 from cypher import encode, decode
 from credentials import Credential
 
-HOSTNAME = socket.gethostbyname(socket.gethostname())
+
+def get_ip_addr():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip_address = s.getsockname()[0]
+    s.close()
+    return ip_address
+
+
+HOSTNAME = get_ip_addr()
 PORT = 9000
 
 
