@@ -8,6 +8,7 @@ import time
 import fcntl
 import struct
 import socket
+import argparse
 from urllib.parse import urlparse, parse_qsl
 from http.server import BaseHTTPRequestHandler, HTTPServer
 # Project specific modules
@@ -15,6 +16,12 @@ import ui
 from data import Data
 from cypher import encode, decode
 from credentials import Credential
+
+
+# Get port number from user input.
+parser = argparse.ArgumentParser(prog="cypy", description="CyPy CLI")
+parser.add_argument("port", help="Port in which CyPy listens.")
+args = parser.parse_args()
 
 
 def get_ip_addr():
@@ -26,7 +33,7 @@ def get_ip_addr():
 
 
 HOSTNAME = get_ip_addr()
-PORT = 9000
+PORT = int(args.port)
 
 username_pattern = re.compile(r"\busername=([^&]+)")
 password_pattern = re.compile(r"\bpassword=([^&]+)")

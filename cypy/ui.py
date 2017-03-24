@@ -23,4 +23,4 @@ def generate_form(action):
         raise ValueError("No valid action chosen.")
     form = ("<form action='{0}' method='post'>{1}</form>".format(action,
                                                                  form_body))
-    return page.format(form)
+    return "<!DOCTYPE html>" + page.format(form)
