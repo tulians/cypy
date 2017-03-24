@@ -3,6 +3,7 @@
 # ===================================
 
 # Built-in modules
+import re
 import time
 import fcntl
 import struct
@@ -10,6 +11,7 @@ import socket
 from urllib.parse import urlparse, parse_qsl
 from http.server import BaseHTTPRequestHandler, HTTPServer
 # Project specific modules
+import ui
 from data import Data
 from cypher import encode, decode
 from credentials import Credential
@@ -26,21 +28,50 @@ def get_ip_addr():
 HOSTNAME = get_ip_addr()
 PORT = 9000
 
+username_pattern = re.compile(r"\busername=([^&]+)")
+password_pattern = re.compile(r"\bpassword=([^&]+)")
+keyword_pattern = re.compile(r"\bkeyword=(\w+)")
+
+paths = {
+    "/add": {"status": 200},
+    "/get": {"status": 200},
+    "/del": {"status": 200},
+}
+
 
 class CyPyServer(BaseHTTPRequestHandler):
     def do_GET(self):
-        paths = {
-            "/add": {"status": 200},
-            "/get": {"status": 200},
-            "/del": {"status": 200}
-        }
         parsed_url = urlparse(self.path)
-        query_str = dict(parse_qsl(parsed_url.query))
+        if parsed_url.path == "/favicon.ico":
+            return
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(bytes(ui.generate_form(parsed_url.path), "UTF-8"))
+
+    def do_POST(self):
+        parsed_url = urlparse(self.path)
+        # Get POST body content.
+        content_length = int(self.headers['Content-Length'])
+        post_data = self.rfile.read(content_length).decode("UTF-8")
+        try:
+            # Get each key-value pair.
+            data = {
+                "username": username_pattern.findall(post_data)[0],
+                "keyword": keyword_pattern.findall(post_data)[0]
+            }
+            if len(password_pattern.findall(post_data)) > 0:
+                data["password"] = password_pattern.findall(post_data)[0]
+        except IndexError:
+            print("No valid values used in form or the form has empty"
+                  " obligatory values.")
+            raise
+
         if parsed_url.path in paths:
             self.handle_request(paths[parsed_url.path]["status"],
-                                parsed_url, query_str)
+                                parsed_url, data)
         else:
-            self.handle_request(500, parsed_url, query_str)
+            self.handle_request(500, parsed_url, data)
 
     def handle_request(self, status_code, parsed_url, query_str):
         d = Data()
@@ -52,7 +83,7 @@ class CyPyServer(BaseHTTPRequestHandler):
             response = ("Successfully added '{}' to credentials DB.".format(
                 data["username"]
             ))
-            return "<body><p>{}</p>".format(response)
+            return "<body><p>{}</p></body>".format(response)
 
         def get_credential(data):
             try:
@@ -61,7 +92,7 @@ class CyPyServer(BaseHTTPRequestHandler):
                 response = decode(data["keyword"], password)
             except KeyError:
                 response = "ERROR: No such user."
-            return "<body>{}</body>".format(response)
+            return "<body><p>{}</p></body>".format(response)
 
         def delete_credential(data):
             try:
@@ -72,7 +103,7 @@ class CyPyServer(BaseHTTPRequestHandler):
                 )
             except KeyError:
                 response = "ERROR: No such user."
-            return response
+            return "<body><p>{}</p></body>".format(response)
 
         self.send_response(status_code)
         self.send_header('Content-type', 'text/html')
