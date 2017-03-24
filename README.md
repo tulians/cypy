@@ -18,7 +18,7 @@ which will present a form in screen, asking for a *username*, *password* and a *
 #### Retrieve credential
 Given the credential username, you can retrieve the associated password by searching in a browser for
 ```
-<your_server's_ip>:<selected_port>/add
+<your_server's_ip>:<selected_port>/get
 ```
 which will present a form in screen. This form must be filled with the username of the credential and the keyword used when creating the credential.
 
